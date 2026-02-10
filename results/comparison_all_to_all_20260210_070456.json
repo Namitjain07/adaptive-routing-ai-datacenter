@@ -1,0 +1,697 @@
+{
+  "ecmp": {
+    "experiment": {
+      "routing_scheme": "ecmp",
+      "traffic_type": "all_to_all",
+      "duration": 15,
+      "topology": {
+        "num_spines": 2,
+        "num_leaves": 3,
+        "hosts_per_leaf": 3,
+        "total_hosts": 9
+      },
+      "timestamp": "2026-02-10T06:54:34.168407"
+    },
+    "traffic": [
+      {
+        "src": "h4",
+        "src_ip": "10.0.2.1",
+        "dst": "h1",
+        "dst_ip": "10.0.1.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.966504"
+      },
+      {
+        "src": "h5",
+        "src_ip": "10.0.2.2",
+        "dst": "h1",
+        "dst_ip": "10.0.1.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.967186"
+      },
+      {
+        "src": "h6",
+        "src_ip": "10.0.2.3",
+        "dst": "h1",
+        "dst_ip": "10.0.1.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.967613"
+      },
+      {
+        "src": "h7",
+        "src_ip": "10.0.3.1",
+        "dst": "h1",
+        "dst_ip": "10.0.1.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.968369"
+      },
+      {
+        "src": "h4",
+        "src_ip": "10.0.2.1",
+        "dst": "h2",
+        "dst_ip": "10.0.1.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.968743"
+      },
+      {
+        "src": "h5",
+        "src_ip": "10.0.2.2",
+        "dst": "h2",
+        "dst_ip": "10.0.1.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.969578"
+      },
+      {
+        "src": "h6",
+        "src_ip": "10.0.2.3",
+        "dst": "h2",
+        "dst_ip": "10.0.1.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.969925"
+      },
+      {
+        "src": "h8",
+        "src_ip": "10.0.3.2",
+        "dst": "h1",
+        "dst_ip": "10.0.1.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.970118"
+      },
+      {
+        "src": "h7",
+        "src_ip": "10.0.3.1",
+        "dst": "h2",
+        "dst_ip": "10.0.1.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.970214"
+      },
+      {
+        "src": "h4",
+        "src_ip": "10.0.2.1",
+        "dst": "h3",
+        "dst_ip": "10.0.1.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.970804"
+      },
+      {
+        "src": "h9",
+        "src_ip": "10.0.3.3",
+        "dst": "h1",
+        "dst_ip": "10.0.1.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.970946"
+      },
+      {
+        "src": "h5",
+        "src_ip": "10.0.2.2",
+        "dst": "h3",
+        "dst_ip": "10.0.1.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.971528"
+      },
+      {
+        "src": "h6",
+        "src_ip": "10.0.2.3",
+        "dst": "h3",
+        "dst_ip": "10.0.1.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.971831"
+      },
+      {
+        "src": "h8",
+        "src_ip": "10.0.3.2",
+        "dst": "h2",
+        "dst_ip": "10.0.1.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.971973"
+      },
+      {
+        "src": "h7",
+        "src_ip": "10.0.3.1",
+        "dst": "h3",
+        "dst_ip": "10.0.1.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.972035"
+      },
+      {
+        "src": "h9",
+        "src_ip": "10.0.3.3",
+        "dst": "h2",
+        "dst_ip": "10.0.1.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.972668"
+      },
+      {
+        "src": "h7",
+        "src_ip": "10.0.3.1",
+        "dst": "h4",
+        "dst_ip": "10.0.2.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.973782"
+      },
+      {
+        "src": "h8",
+        "src_ip": "10.0.3.2",
+        "dst": "h3",
+        "dst_ip": "10.0.1.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.973855"
+      },
+      {
+        "src": "h9",
+        "src_ip": "10.0.3.3",
+        "dst": "h3",
+        "dst_ip": "10.0.1.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.974131"
+      },
+      {
+        "src": "h7",
+        "src_ip": "10.0.3.1",
+        "dst": "h5",
+        "dst_ip": "10.0.2.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.976065"
+      },
+      {
+        "src": "h9",
+        "src_ip": "10.0.3.3",
+        "dst": "h4",
+        "dst_ip": "10.0.2.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.976274"
+      },
+      {
+        "src": "h8",
+        "src_ip": "10.0.3.2",
+        "dst": "h4",
+        "dst_ip": "10.0.2.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.976482"
+      },
+      {
+        "src": "h7",
+        "src_ip": "10.0.3.1",
+        "dst": "h6",
+        "dst_ip": "10.0.2.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.978104"
+      },
+      {
+        "src": "h9",
+        "src_ip": "10.0.3.3",
+        "dst": "h5",
+        "dst_ip": "10.0.2.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.978198"
+      },
+      {
+        "src": "h8",
+        "src_ip": "10.0.3.2",
+        "dst": "h5",
+        "dst_ip": "10.0.2.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.978361"
+      },
+      {
+        "src": "h9",
+        "src_ip": "10.0.3.3",
+        "dst": "h6",
+        "dst_ip": "10.0.2.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.979847"
+      },
+      {
+        "src": "h8",
+        "src_ip": "10.0.3.2",
+        "dst": "h6",
+        "dst_ip": "10.0.2.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:28.980050"
+      },
+      {
+        "src": "h1",
+        "src_ip": "10.0.1.1",
+        "dst": "h2",
+        "dst_ip": "10.0.1.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:29.311855"
+      },
+      {
+        "src": "h5",
+        "src_ip": "10.0.2.2",
+        "dst": "h4",
+        "dst_ip": "10.0.2.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:29.321514"
+      },
+      {
+        "src": "h6",
+        "src_ip": "10.0.2.3",
+        "dst": "h4",
+        "dst_ip": "10.0.2.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:31.374433"
+      },
+      {
+        "src": "h8",
+        "src_ip": "10.0.3.2",
+        "dst": "h7",
+        "dst_ip": "10.0.3.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:31.374607"
+      },
+      {
+        "src": "h6",
+        "src_ip": "10.0.2.3",
+        "dst": "h5",
+        "dst_ip": "10.0.2.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:32.782945"
+      },
+      {
+        "src": "h6",
+        "src_ip": "10.0.2.3",
+        "dst": "h7",
+        "dst_ip": "10.0.3.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:32.784558"
+      },
+      {
+        "src": "h6",
+        "src_ip": "10.0.2.3",
+        "dst": "h8",
+        "dst_ip": "10.0.3.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:32.786566"
+      },
+      {
+        "src": "h6",
+        "src_ip": "10.0.2.3",
+        "dst": "h9",
+        "dst_ip": "10.0.3.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:32.788812"
+      },
+      {
+        "src": "h1",
+        "src_ip": "10.0.1.1",
+        "dst": "h3",
+        "dst_ip": "10.0.1.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:33.742509"
+      },
+      {
+        "src": "h1",
+        "src_ip": "10.0.1.1",
+        "dst": "h4",
+        "dst_ip": "10.0.2.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:33.744297"
+      },
+      {
+        "src": "h1",
+        "src_ip": "10.0.1.1",
+        "dst": "h5",
+        "dst_ip": "10.0.2.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:33.746417"
+      },
+      {
+        "src": "h1",
+        "src_ip": "10.0.1.1",
+        "dst": "h6",
+        "dst_ip": "10.0.2.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:33.748359"
+      },
+      {
+        "src": "h1",
+        "src_ip": "10.0.1.1",
+        "dst": "h7",
+        "dst_ip": "10.0.3.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:33.750222"
+      },
+      {
+        "src": "h1",
+        "src_ip": "10.0.1.1",
+        "dst": "h8",
+        "dst_ip": "10.0.3.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:33.753435"
+      },
+      {
+        "src": "h1",
+        "src_ip": "10.0.1.1",
+        "dst": "h9",
+        "dst_ip": "10.0.3.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:33.755772"
+      },
+      {
+        "src": "h5",
+        "src_ip": "10.0.2.2",
+        "dst": "h6",
+        "dst_ip": "10.0.2.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:36.877777"
+      },
+      {
+        "src": "h5",
+        "src_ip": "10.0.2.2",
+        "dst": "h7",
+        "dst_ip": "10.0.3.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:36.879417"
+      },
+      {
+        "src": "h5",
+        "src_ip": "10.0.2.2",
+        "dst": "h8",
+        "dst_ip": "10.0.3.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:36.881642"
+      },
+      {
+        "src": "h5",
+        "src_ip": "10.0.2.2",
+        "dst": "h9",
+        "dst_ip": "10.0.3.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:37:36.883609"
+      },
+      {
+        "src": "h7",
+        "src_ip": "10.0.3.1",
+        "dst": "h8",
+        "dst_ip": "10.0.3.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:39:45.233808"
+      },
+      {
+        "src": "h9",
+        "src_ip": "10.0.3.3",
+        "dst": "h7",
+        "dst_ip": "10.0.3.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:39:45.234044"
+      },
+      {
+        "src": "h4",
+        "src_ip": "10.0.2.1",
+        "dst": "h5",
+        "dst_ip": "10.0.2.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:39:45.234198"
+      },
+      {
+        "src": "h3",
+        "src_ip": "10.0.1.3",
+        "dst": "h1",
+        "dst_ip": "10.0.1.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:39:45.234384"
+      },
+      {
+        "src": "h2",
+        "src_ip": "10.0.1.2",
+        "dst": "h1",
+        "dst_ip": "10.0.1.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:39:45.234681"
+      },
+      {
+        "src": "h7",
+        "src_ip": "10.0.3.1",
+        "dst": "h9",
+        "dst_ip": "10.0.3.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.401860"
+      },
+      {
+        "src": "h2",
+        "src_ip": "10.0.1.2",
+        "dst": "h3",
+        "dst_ip": "10.0.1.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.402014"
+      },
+      {
+        "src": "h4",
+        "src_ip": "10.0.2.1",
+        "dst": "h6",
+        "dst_ip": "10.0.2.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.402105"
+      },
+      {
+        "src": "h9",
+        "src_ip": "10.0.3.3",
+        "dst": "h8",
+        "dst_ip": "10.0.3.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.402202"
+      },
+      {
+        "src": "h3",
+        "src_ip": "10.0.1.3",
+        "dst": "h2",
+        "dst_ip": "10.0.1.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.402406"
+      },
+      {
+        "src": "h2",
+        "src_ip": "10.0.1.2",
+        "dst": "h4",
+        "dst_ip": "10.0.2.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.404373"
+      },
+      {
+        "src": "h4",
+        "src_ip": "10.0.2.1",
+        "dst": "h7",
+        "dst_ip": "10.0.3.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.404450"
+      },
+      {
+        "src": "h3",
+        "src_ip": "10.0.1.3",
+        "dst": "h4",
+        "dst_ip": "10.0.2.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.404549"
+      },
+      {
+        "src": "h4",
+        "src_ip": "10.0.2.1",
+        "dst": "h8",
+        "dst_ip": "10.0.3.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.406130"
+      },
+      {
+        "src": "h3",
+        "src_ip": "10.0.1.3",
+        "dst": "h5",
+        "dst_ip": "10.0.2.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.406232"
+      },
+      {
+        "src": "h2",
+        "src_ip": "10.0.1.2",
+        "dst": "h5",
+        "dst_ip": "10.0.2.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.407442"
+      },
+      {
+        "src": "h4",
+        "src_ip": "10.0.2.1",
+        "dst": "h9",
+        "dst_ip": "10.0.3.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.407985"
+      },
+      {
+        "src": "h3",
+        "src_ip": "10.0.1.3",
+        "dst": "h6",
+        "dst_ip": "10.0.2.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.408150"
+      },
+      {
+        "src": "h2",
+        "src_ip": "10.0.1.2",
+        "dst": "h6",
+        "dst_ip": "10.0.2.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.409086"
+      },
+      {
+        "src": "h3",
+        "src_ip": "10.0.1.3",
+        "dst": "h7",
+        "dst_ip": "10.0.3.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.409488"
+      },
+      {
+        "src": "h2",
+        "src_ip": "10.0.1.2",
+        "dst": "h7",
+        "dst_ip": "10.0.3.1",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.410836"
+      },
+      {
+        "src": "h3",
+        "src_ip": "10.0.1.3",
+        "dst": "h8",
+        "dst_ip": "10.0.3.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.410919"
+      },
+      {
+        "src": "h3",
+        "src_ip": "10.0.1.3",
+        "dst": "h9",
+        "dst_ip": "10.0.3.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.412107"
+      },
+      {
+        "src": "h2",
+        "src_ip": "10.0.1.2",
+        "dst": "h8",
+        "dst_ip": "10.0.3.2",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.412403"
+      },
+      {
+        "src": "h2",
+        "src_ip": "10.0.1.2",
+        "dst": "h9",
+        "dst_ip": "10.0.3.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:42:00.414553"
+      },
+      {
+        "src": "h8",
+        "src_ip": "10.0.3.2",
+        "dst": "h9",
+        "dst_ip": "10.0.3.3",
+        "protocol": "tcp",
+        "duration": 15,
+        "timestamp": "2026-02-10T06:54:13.585680"
+      }
+    ],
+    "monitoring": {
+      "total_samples": 986,
+      "duration": 1026.38802,
+      "link_utilization": {},
+      "packet_drops": {},
+      "flow_counts": {}
+    }
+  },
+  "adaptive": {
+    "experiment": {
+      "routing_scheme": "adaptive",
+      "traffic_type": "all_to_all",
+      "duration": 15,
+      "topology": {
+        "num_spines": 2,
+        "num_leaves": 3,
+        "hosts_per_leaf": 3,
+        "total_hosts": 9
+      },
+      "timestamp": "2026-02-10T07:04:54.459725"
+    },
+    "traffic": {
+      "error": ""
+    },
+    "monitoring": {
+      "total_samples": 578,
+      "duration": 600.546744,
+      "link_utilization": {},
+      "packet_drops": {},
+      "flow_counts": {}
+    }
+  }
+}

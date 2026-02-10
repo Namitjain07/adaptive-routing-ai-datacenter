@@ -1,0 +1,24 @@
+{
+  "experiment": {
+    "routing_scheme": "ecmp",
+    "traffic_type": "all_to_all",
+    "duration": 15,
+    "topology": {
+      "num_spines": 4,
+      "num_leaves": 4,
+      "hosts_per_leaf": 4,
+      "total_hosts": 16
+    },
+    "timestamp": "2026-02-10T04:10:24.102771"
+  },
+  "traffic": {
+    "error": ""
+  },
+  "monitoring": {
+    "total_samples": 613,
+    "duration": 653.485097,
+    "link_utilization": {},
+    "packet_drops": {},
+    "flow_counts": {}
+  }
+}
