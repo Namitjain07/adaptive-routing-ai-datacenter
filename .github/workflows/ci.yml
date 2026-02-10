@@ -1,0 +1,189 @@
+name: CI - Code Quality and Testing
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  workflow_dispatch:
+
+jobs:
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pylint flake8 black isort mypy
+        
+    - name: Check code formatting with Black
+      run: |
+        black --check --diff routing/ topologies/ *.py || true
+        
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only --diff routing/ topologies/ *.py || true
+        
+    - name: Lint with flake8
+      run: |
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 routing/ topologies/ *.py --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
+        flake8 routing/ topologies/ *.py --count --exit-zero --max-complexity=15 --max-line-length=100 --statistics
+        
+    - name: Lint with pylint
+      run: |
+        pylint routing/ topologies/ *.py --exit-zero --max-line-length=100 --disable=C0111,R0913,R0914,W0612,W0613
+        
+    - name: Type check with mypy
+      run: |
+        mypy routing/ topologies/ *.py --ignore-missing-imports --no-strict-optional || true
+
+  syntax-validation:
+    name: Python Syntax Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        
+    - name: Validate Python syntax
+      run: |
+        python -m py_compile routing/*.py
+        python -m py_compile topologies/*.py
+        python -m py_compile *.py
+        
+    - name: Check for common issues
+      run: |
+        echo "Checking for print statements (debugging)..."
+        grep -r "print(" routing/ topologies/ *.py | grep -v "def print" | grep -v "#" || echo "No debug prints found"
+        
+        echo "Checking for TODO/FIXME comments..."
+        grep -r "TODO\|FIXME" routing/ topologies/ *.py || echo "No TODOs found"
+
+  test-installation:
+    name: Test Installation Script
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run installation test
+      run: |
+        python test_installation.py
+        
+    - name: Verify project structure
+      run: |
+        echo "Checking project structure..."
+        test -d routing || exit 1
+        test -d topologies || exit 1
+        test -d results || exit 1
+        test -f README.md || exit 1
+        test -f requirements.txt || exit 1
+        echo "Project structure verified!"
+
+  documentation-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check README exists
+      run: |
+        test -f README.md
+        test -f DESIGN.md
+        test -f PROJECT_REPORT.md
+        test -f PROJECT_SUMMARY.md
+        
+    - name: Verify README content
+      run: |
+        grep -q "Adaptive and Load-Aware Routing" README.md
+        grep -q "ECMP" README.md
+        grep -q "Mininet" README.md
+        
+    - name: Check for broken links in markdown
+      uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: 'yes'
+        config-file: '.github/workflows/markdown-link-config.json'
+      continue-on-error: true
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install safety bandit
+        
+    - name: Run safety check for vulnerable dependencies
+      run: |
+        safety check --json || true
+        
+    - name: Run bandit security linter
+      run: |
+        bandit -r routing/ topologies/ -f json -o bandit-report.json || true
+        
+    - name: Upload bandit report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: bandit-security-report
+        path: bandit-report.json
+
+  build-summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [code-quality, syntax-validation, test-installation, documentation-check, security-scan]
+    if: always()
+    
+    steps:
+    - name: Check build status
+      run: |
+        echo "All CI checks completed!"
+        echo "Code Quality: ${{ needs.code-quality.result }}"
+        echo "Syntax Validation: ${{ needs.syntax-validation.result }}"
+        echo "Installation Test: ${{ needs.test-installation.result }}"
+        echo "Documentation: ${{ needs.documentation-check.result }}"
+        echo "Security Scan: ${{ needs.security-scan.result }}"

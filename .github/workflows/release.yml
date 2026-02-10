@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        
+    - name: Generate changelog
+      id: changelog
+      run: |
+        echo "# Changelog" > CHANGELOG.md
+        echo "" >> CHANGELOG.md
+        git log --pretty=format:"- %s (%an)" --no-merges $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD")..HEAD >> CHANGELOG.md || echo "- Initial release" >> CHANGELOG.md
+        
+    - name: Create archive
+      run: |
+        mkdir -p release
+        tar -czf release/adaptive-routing-ai-datacenter.tar.gz \
+          --exclude='.git' \
+          --exclude='release' \
+          --exclude='__pycache__' \
+          --exclude='*.pyc' \
+          --exclude='.github' \
+          .
+        
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        cat << EOF > release_notes.md
+        ## Adaptive and Load-Aware Routing for AI Data Center Fabrics
+        
+        ### Release Highlights
+        
+        This release includes a complete simulation framework for evaluating adaptive routing strategies in AI data center networks.
+        
+        ### Key Features
+        
+        - ✅ Leaf-spine topology implementation in Mininet
+        - ✅ ECMP baseline routing
+        - ✅ Adaptive flowlet-based routing
+        - ✅ All-to-all AI traffic generation
+        - ✅ Comprehensive performance monitoring
+        - ✅ Automated experiment runner
+        - ✅ Statistical analysis and visualization
+        
+        ### Performance Metrics
+        
+        - Tail Flow Completion Time (P99)
+        - Link Utilization Balance
+        - Aggregate Throughput
+        - Congestion Duration
+        - Packet Drop Rate
+        
+        ### Installation
+        
+        \`\`\`bash
+        tar -xzf adaptive-routing-ai-datacenter.tar.gz
+        cd adaptive-routing-ai-datacenter
+        chmod +x setup.sh
+        ./setup.sh
+        \`\`\`
+        
+        ### Quick Start
+        
+        \`\`\`bash
+        sudo python3 run_experiment.py --mode comparison --traffic all_to_all --duration 30
+        python3 analyze_results.py results/comparison_*.json
+        \`\`\`
+        
+        ### Documentation
+        
+        - 📖 [README.md](README.md) - Installation and usage guide
+        - 📋 [DESIGN.md](DESIGN.md) - Routing strategy design
+        - 📄 [PROJECT_REPORT.md](PROJECT_REPORT.md) - Comprehensive project report
+        
+        ---
+        
+        $(cat CHANGELOG.md)
+        EOF
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        body_path: release_notes.md
+        files: release/adaptive-routing-ai-datacenter.tar.gz
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
