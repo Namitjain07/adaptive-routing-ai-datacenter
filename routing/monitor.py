@@ -7,10 +7,18 @@ Collect metrics for routing comparison.
 import time
 import json
 import threading
+import logging
+import sys
+import os
 from datetime import datetime
 from collections import defaultdict
 import subprocess
 import re
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.logger import get_logger
+
+logger = get_logger('monitor')
 
 
 class NetworkMonitor:
@@ -46,14 +54,14 @@ class NetworkMonitor:
         self.monitor_thread = threading.Thread(target=self._monitor_loop)
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
-        print("*** Network monitoring started")
+        logger.info("Network monitoring started")
     
     def stop(self):
         """Stop monitoring"""
         self.monitoring = False
         if self.monitor_thread:
             self.monitor_thread.join()
-        print("*** Network monitoring stopped")
+        logger.info("Network monitoring stopped")
     
     def _monitor_loop(self):
         """Background monitoring loop"""
@@ -88,22 +96,22 @@ class NetworkMonitor:
         try:
             output = switch.cmd(f'ovs-ofctl dump-ports {switch.name}')
             stats['ports'] = self._parse_port_stats(output)
-        except:
-            pass
+        except Exception as e:
+            logger.debug(f"Error getting port stats for {switch.name}: {e}")
         
         # Get flow statistics
         try:
             output = switch.cmd(f'ovs-ofctl dump-flows {switch.name}')
             stats['flows'] = self._parse_flow_stats(output)
-        except:
-            pass
+        except Exception as e:
+            logger.debug(f"Error getting flow stats for {switch.name}: {e}")
         
         # Get queue statistics
         try:
             output = switch.cmd(f'ovs-ofctl queue-stats {switch.name}')
             stats['queues'] = self._parse_queue_stats(output)
-        except:
-            pass
+        except Exception as e:
+            logger.debug(f"Error getting queue stats for {switch.name}: {e}")
         
         return stats
     
@@ -134,7 +142,8 @@ class NetworkMonitor:
                             'tx_bytes': int(tx_match.group(2)),
                             'tx_drops': int(tx_match.group(3))
                         }
-                except:
+                except Exception as e:
+                    logger.debug(f"Error parsing port stats line: {e}")
                     continue
         
         return port_stats
@@ -155,7 +164,8 @@ class NetworkMonitor:
                             'packets': int(pkt_match.group(1)),
                             'bytes': int(byte_match.group(1))
                         })
-                except:
+                except Exception as e:
+                    logger.debug(f"Error parsing flow stats line: {e}")
                     continue
         
         return flow_stats
@@ -263,31 +273,31 @@ class NetworkMonitor:
         with open(filename, 'w') as f:
             json.dump(data, f, indent=2)
         
-        print(f"*** Monitoring results saved to {filename}")
+        logger.info(f"Monitoring results saved to {filename}")
     
     def print_summary(self):
         """Print summary of collected statistics"""
         stats = self.get_statistics()
         
-        print("\n" + "="*60)
-        print("NETWORK MONITORING SUMMARY")
-        print("="*60)
-        print(f"Duration: {stats['duration']:.2f} seconds")
-        print(f"Samples collected: {stats['total_samples']}")
+        logger.info("="*60)
+        logger.info("NETWORK MONITORING SUMMARY")
+        logger.info("="*60)
+        logger.info(f"Duration: {stats['duration']:.2f} seconds")
+        logger.info(f"Samples collected: {stats['total_samples']}")
         
-        print("\nLink Utilization:")
+        logger.info("Link Utilization:")
         for link_id, util in stats['link_utilization'].items():
-            print(f"  {link_id}: mean={util['mean']:.2f}%, "
+            logger.info(f"  {link_id}: mean={util['mean']:.2f}%, "
                   f"max={util['max']:.2f}%, min={util['min']:.2f}%")
         
         if stats['packet_drops']:
-            print("\nPacket Drops:")
+            logger.info("Packet Drops:")
             for link_id, drops in stats['packet_drops'].items():
-                print(f"  {link_id}: {drops} packets")
+                logger.info(f"  {link_id}: {drops} packets")
         else:
-            print("\nNo packet drops detected")
+            logger.info("No packet drops detected")
         
-        print("="*60)
+        logger.info("="*60)
 
 
 class FlowCompletionTracker:
@@ -296,6 +306,7 @@ class FlowCompletionTracker:
     def __init__(self):
         self.flows = {}
         self.completed_flows = []
+        logger.debug("FlowCompletionTracker initialized")
     
     def start_flow(self, flow_id, src, dst, size):
         """Record flow start"""
@@ -305,6 +316,7 @@ class FlowCompletionTracker:
             'size': size,
             'start_time': time.time()
         }
+        logger.debug(f"Flow {flow_id} started: {src} -> {dst}, size={size}")
     
     def end_flow(self, flow_id):
         """Record flow completion"""
@@ -313,6 +325,7 @@ class FlowCompletionTracker:
             flow['end_time'] = time.time()
             flow['fct'] = flow['end_time'] - flow['start_time']
             self.completed_flows.append(flow)
+            logger.debug(f"Flow {flow_id} completed in {flow['fct']:.3f}s")
             del self.flows[flow_id]
     
     def get_fct_stats(self):
@@ -336,5 +349,7 @@ class FlowCompletionTracker:
 
 
 if __name__ == '__main__':
-    print("Network Monitoring Module")
-    print("Use with Mininet network for performance measurement")
+    from utils.logger import setup_logger
+    setup_logger('monitor', level=logging.INFO)
+    logger.info("Network Monitoring Module")
+    logger.info("Use with Mininet network for performance measurement")

@@ -9,16 +9,20 @@ import argparse
 import time
 import json
 import signal
+import logging
 from datetime import datetime
 
 sys.path.append('/home/namitjain07/Desktop/NAI')
+
+from utils.logger import setup_logger, get_logger
 
 # Global cleanup function
 cleanup_net = None
 
 def signal_handler(sig, frame):
     """Handle Ctrl+C gracefully"""
-    print("\n\n*** Interrupt received - cleaning up...")
+    logger = get_logger()
+    logger.warning("\nInterrupt received - cleaning up...")
     if cleanup_net:
         cleanup_net.stop()
     sys.exit(0)
@@ -42,6 +46,7 @@ class ExperimentRunner:
         self.num_leaves = num_leaves
         self.hosts_per_leaf = hosts_per_leaf
         self.results = {}
+        self.logger = get_logger()
     
     def run_experiment(self, routing_scheme='ecmp', traffic_type='all_to_all',
                       duration=10, output_dir='results'):
@@ -56,12 +61,12 @@ class ExperimentRunner:
         """
         global cleanup_net
         
-        print("\n" + "="*70)
-        print(f"EXPERIMENT: {routing_scheme.upper()} Routing with {traffic_type} Traffic")
-        print("="*70)
+        self.logger.info("="*70)
+        self.logger.info(f"EXPERIMENT: {routing_scheme.upper()} Routing with {traffic_type} Traffic")
+        self.logger.info("="*70)
         
         # Create network
-        print("\n*** Creating network...")
+        self.logger.info("Creating network...")
         net = create_network(
             num_spines=self.num_spines,
             num_leaves=self.num_leaves,
@@ -70,12 +75,12 @@ class ExperimentRunner:
         cleanup_net = net  # Set for signal handler
         
         # Start network
-        print("*** Starting network...")
+        self.logger.info("Starting network...")
         net.start()
         time.sleep(2)
         
         # Install routing
-        print(f"\n*** Installing {routing_scheme} routing...")
+        self.logger.info(f"Installing {routing_scheme} routing...")
         if routing_scheme == 'ecmp':
             router, routing_table = setup_ecmp_routing(
                 net, 
@@ -95,40 +100,40 @@ class ExperimentRunner:
         time.sleep(2)
         
         # Test connectivity (limited test to avoid hanging)
-        print("\n*** Testing basic connectivity...")
+        self.logger.info("Testing basic connectivity...")
         hosts = net.hosts
         if len(hosts) >= 2:
             result = hosts[0].cmd(f'ping -c 1 -W 2 {hosts[1].IP()}')
             if 'bytes from' in result:
-                print(f"    ✓ Connectivity verified: {hosts[0].name} -> {hosts[1].name}")
+                self.logger.info(f"Connectivity verified: {hosts[0].name} -> {hosts[1].name}")
             else:
-                print(f"    ⚠ Warning: Limited connectivity detected")
+                self.logger.warning("Limited connectivity detected")
         
         # Start monitoring
-        print("\n*** Starting network monitoring...")
+        self.logger.info("Starting network monitoring...")
         monitor = NetworkMonitor(net, sample_interval=1.0)
         monitor.start()
         
         # Generate traffic
-        print(f"\n*** Generating {traffic_type} traffic...")
+        self.logger.info(f"Generating {traffic_type} traffic...")
         try:
             traffic_results = run_traffic_test(net, traffic_type, duration)
         except Exception as e:
-            print(f"    ⚠ Warning: Traffic generation error: {e}")
+            self.logger.error(f"Traffic generation error: {e}", exc_info=True)
             traffic_results = {'error': str(e)}
         
         # Wait for traffic to complete
-        print(f"*** Waiting {duration + 5} seconds for traffic to complete...")
+        self.logger.info(f"Waiting {duration + 5} seconds for traffic to complete...")
         for i in range(duration + 5):
             time.sleep(1)
             if (i + 1) % 5 == 0:
-                print(f"    ... {i + 1}/{duration + 5} seconds elapsed")
+                self.logger.debug(f"{i + 1}/{duration + 5} seconds elapsed")
         
         # Stop monitoring
         monitor.stop()
         
         # Collect results
-        print("\n*** Collecting results...")
+        self.logger.info("Collecting results...")
         results = {
             'experiment': {
                 'routing_scheme': routing_scheme,
@@ -155,19 +160,19 @@ class ExperimentRunner:
         with open(filename, 'w') as f:
             json.dump(results, f, indent=2)
         
-        print(f"*** Results saved to {filename}")
+        self.logger.info(f"Results saved to {filename}")
         
         # Print summary
         monitor.print_summary()
         
         # Stop network
-        print("\n*** Stopping network...")
+        self.logger.info("Stopping network...")
         try:
             if routing_scheme == 'adaptive' and 'router' in locals():
                 router.stop()
             net.stop()
         except Exception as e:
-            print(f"    Warning during cleanup: {e}")
+            self.logger.warning(f"Warning during cleanup: {e}")
         finally:
             # Ensure cleanup
             import subprocess
@@ -187,19 +192,19 @@ class ExperimentRunner:
             duration: Duration of each experiment
             output_dir: Directory to save results
         """
-        print("\n" + "="*70)
-        print("ROUTING COMPARISON EXPERIMENT")
-        print("="*70)
-        print(f"Traffic Type: {traffic_type}")
-        print(f"Duration: {duration} seconds")
-        print(f"Topology: {self.num_spines} spines, {self.num_leaves} leaves, "
+        self.logger.info("="*70)
+        self.logger.info("ROUTING COMPARISON EXPERIMENT")
+        self.logger.info("="*70)
+        self.logger.info(f"Traffic Type: {traffic_type}")
+        self.logger.info(f"Duration: {duration} seconds")
+        self.logger.info(f"Topology: {self.num_spines} spines, {self.num_leaves} leaves, "
               f"{self.hosts_per_leaf} hosts/leaf")
-        print("="*70)
+        self.logger.info("="*70)
         
         results = {}
         
         # Run ECMP experiment
-        print("\n### Running ECMP Experiment ###")
+        self.logger.info("Running ECMP Experiment")
         results['ecmp'] = self.run_experiment(
             routing_scheme='ecmp',
             traffic_type=traffic_type,
@@ -208,11 +213,11 @@ class ExperimentRunner:
         )
         
         # Wait between experiments
-        print("\n*** Waiting 10 seconds before next experiment...")
+        self.logger.info("Waiting 10 seconds before next experiment...")
         time.sleep(10)
         
         # Run Adaptive experiment
-        print("\n### Running Adaptive Routing Experiment ###")
+        self.logger.info("Running Adaptive Routing Experiment")
         results['adaptive'] = self.run_experiment(
             routing_scheme='adaptive',
             traffic_type=traffic_type,
@@ -225,7 +230,7 @@ class ExperimentRunner:
         with open(comparison_file, 'w') as f:
             json.dump(results, f, indent=2)
         
-        print(f"\n*** Comparison results saved to {comparison_file}")
+        self.logger.info(f"Comparison results saved to {comparison_file}")
         
         # Print comparison summary
         self.print_comparison_summary(results)
@@ -234,41 +239,41 @@ class ExperimentRunner:
     
     def print_comparison_summary(self, results):
         """Print comparison summary"""
-        print("\n" + "="*70)
-        print("COMPARISON SUMMARY")
-        print("="*70)
+        self.logger.info("="*70)
+        self.logger.info("COMPARISON SUMMARY")
+        self.logger.info("="*70)
         
         ecmp_stats = results['ecmp']['monitoring']
         adaptive_stats = results['adaptive']['monitoring']
         
-        print("\n### Link Utilization ###")
-        print(f"{'Metric':<30} {'ECMP':<20} {'Adaptive':<20}")
-        print("-" * 70)
+        self.logger.info("Link Utilization")
+        self.logger.info(f"{'Metric':<30} {'ECMP':<20} {'Adaptive':<20}")
+        self.logger.info("-" * 70)
         
         # Compare average link utilization
         if ecmp_stats['link_utilization'] and adaptive_stats['link_utilization']:
             ecmp_avg = sum(u['mean'] for u in ecmp_stats['link_utilization'].values()) / len(ecmp_stats['link_utilization'])
             adaptive_avg = sum(u['mean'] for u in adaptive_stats['link_utilization'].values()) / len(adaptive_stats['link_utilization'])
             
-            print(f"{'Avg Link Utilization (%)':<30} {ecmp_avg:<20.2f} {adaptive_avg:<20.2f}")
+            self.logger.info(f"{'Avg Link Utilization (%)':<30} {ecmp_avg:<20.2f} {adaptive_avg:<20.2f}")
             
             ecmp_max = max(u['max'] for u in ecmp_stats['link_utilization'].values())
             adaptive_max = max(u['max'] for u in adaptive_stats['link_utilization'].values())
             
-            print(f"{'Max Link Utilization (%)':<30} {ecmp_max:<20.2f} {adaptive_max:<20.2f}")
+            self.logger.info(f"{'Max Link Utilization (%)':<30} {ecmp_max:<20.2f} {adaptive_max:<20.2f}")
         
-        print("\n### Packet Drops ###")
+        self.logger.info("Packet Drops")
         ecmp_drops = sum(ecmp_stats['packet_drops'].values()) if ecmp_stats['packet_drops'] else 0
         adaptive_drops = sum(adaptive_stats['packet_drops'].values()) if adaptive_stats['packet_drops'] else 0
         
-        print(f"{'Total Packet Drops':<30} {ecmp_drops:<20} {adaptive_drops:<20}")
+        self.logger.info(f"{'Total Packet Drops':<30} {ecmp_drops:<20} {adaptive_drops:<20}")
         
-        print("\n### Performance Improvement ###")
+        self.logger.info("Performance Improvement")
         if ecmp_drops > 0:
             improvement = ((ecmp_drops - adaptive_drops) / ecmp_drops) * 100
-            print(f"Packet drop reduction: {improvement:.2f}%")
+            self.logger.info(f"Packet drop reduction: {improvement:.2f}%")
         
-        print("="*70)
+        self.logger.info("="*70)
 
 
 def main():
@@ -316,6 +321,10 @@ def main():
                        help='Output directory for results')
     
     args = parser.parse_args()
+    
+    # Setup logger
+    log_level = logging.DEBUG if hasattr(args, 'verbose') and args.verbose else logging.INFO
+    setup_logger(level=log_level)
     
     # Create experiment runner
     runner = ExperimentRunner(

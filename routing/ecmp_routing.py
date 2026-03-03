@@ -6,7 +6,15 @@ Static hash-based multipath routing using OVS flow rules.
 
 import json
 import time
+import logging
+import sys
+import os
 from collections import defaultdict
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.logger import get_logger
+
+logger = get_logger('ecmp_routing')
 
 
 class ECMPRouter:
@@ -19,6 +27,7 @@ class ECMPRouter:
         self.controller = controller
         self.topology = {}
         self.flow_tables = defaultdict(list)
+        logger.debug("ECMPRouter initialized")
         
     def compute_ecmp_paths(self, src, dst, topology):
         """
@@ -37,6 +46,7 @@ class ECMPRouter:
         
         # In leaf-spine: if same leaf, direct path
         if src == dst:
+            logger.debug(f"Same switch path: {src}")
             return [[src]]
         
         # If both are leaves, path goes through any spine
@@ -44,6 +54,7 @@ class ECMPRouter:
             spines = [node for node in topology if 'spine' in node]
             for spine in spines:
                 paths.append([src, spine, dst])
+            logger.debug(f"Computed {len(paths)} ECMP paths from {src} to {dst}")
         
         return paths
     
@@ -55,15 +66,17 @@ class ECMPRouter:
             net: Mininet network object
             routing_table: Pre-computed routing table with ECMP groups
         """
-        print("*** Installing ECMP flow rules...")
+        logger.info("Installing ECMP flow rules...")
         
         for switch_name, rules in routing_table.items():
             switch = net.get(switch_name)
             if switch is None:
+                logger.warning(f"Switch {switch_name} not found in network")
                 continue
             
             # Clear existing flows
             switch.cmd(f'ovs-ofctl del-flows {switch_name}')
+            logger.debug(f"Cleared existing flows on {switch_name}")
             
             # Install new ECMP rules
             for rule in rules:
@@ -75,6 +88,7 @@ class ECMPRouter:
                     flow = (f'priority=100,ip,nw_dst={dst_ip},'
                            f'actions=output:{out_ports[0]}')
                     switch.cmd(f'ovs-ofctl add-flow {switch_name} "{flow}"')
+                    logger.debug(f"{switch_name}: Added single-path flow for {dst_ip} -> port {out_ports[0]}")
                 else:
                     # Multiple paths - use group table for ECMP
                     group_id = hash(f"{switch_name}{dst_ip}") % 10000
@@ -90,11 +104,13 @@ class ECMPRouter:
                     flow = (f'priority=100,ip,nw_dst={dst_ip},'
                            f'actions=group:{group_id}')
                     switch.cmd(f'ovs-ofctl add-flow {switch_name} "{flow}"')
+                    logger.debug(f"{switch_name}: Added ECMP flow for {dst_ip} via group {group_id} "
+                                f"with {len(out_ports)} paths")
             
             # Default flow - flood
             switch.cmd(f'ovs-ofctl add-flow {switch_name} "priority=0,actions=flood"')
         
-        print("*** ECMP rules installed successfully")
+        logger.info("ECMP rules installed successfully")
     
     def build_routing_table(self, net, topology_info):
         """
@@ -188,6 +204,7 @@ class ECMPRouter:
                             'out_ports': [port_to_leaf[leaf_num]]
                         })
         
+        logger.info(f"Built routing table for {len(routing_table)} switches")
         return routing_table
 
 
@@ -201,6 +218,9 @@ def setup_ecmp_routing(net, num_spines=4, num_leaves=4, hosts_per_leaf=4):
         num_leaves: Number of leaf switches
         hosts_per_leaf: Hosts per leaf switch
     """
+    logger.info(f"Setting up ECMP routing (spines={num_spines}, leaves={num_leaves}, "
+               f"hosts/leaf={hosts_per_leaf})")
+    
     router = ECMPRouter(controller=None)
     
     topology_info = {
@@ -209,15 +229,14 @@ def setup_ecmp_routing(net, num_spines=4, num_leaves=4, hosts_per_leaf=4):
         'hosts_per_leaf': hosts_per_leaf
     }
     
-    print("*** Building ECMP routing table...")
     routing_table = router.build_routing_table(net, topology_info)
-    
-    print("*** Installing ECMP rules...")
     router.install_ecmp_rules(net, routing_table)
     
     return router, routing_table
 
 
 if __name__ == '__main__':
-    print("ECMP Routing Module")
-    print("Use this module with the leaf-spine topology")
+    from utils.logger import setup_logger
+    setup_logger('ecmp_routing', level=logging.INFO)
+    logger.info("ECMP Routing Module")
+    logger.info("Use this module with the leaf-spine topology")

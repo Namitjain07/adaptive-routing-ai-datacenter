@@ -1,0 +1,147 @@
+{
+  "experiment": {
+    "routing_scheme": "ecmp",
+    "traffic_type": "all_to_all",
+    "duration": 5,
+    "topology": {
+      "num_spines": 2,
+      "num_leaves": 2,
+      "hosts_per_leaf": 2,
+      "total_hosts": 4
+    },
+    "timestamp": "2026-03-04T02:12:04.912505"
+  },
+  "traffic": [
+    {
+      "src": "h3",
+      "src_ip": "10.0.2.1",
+      "dst": "h1",
+      "dst_ip": "10.0.1.1",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 0.0016033649444580078,
+      "timestamp": "2026-03-04T02:11:43.196097"
+    },
+    {
+      "src": "h4",
+      "src_ip": "10.0.2.2",
+      "dst": "h1",
+      "dst_ip": "10.0.1.1",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 0.0014214515686035156,
+      "timestamp": "2026-03-04T02:11:43.196202"
+    },
+    {
+      "src": "h3",
+      "src_ip": "10.0.2.1",
+      "dst": "h2",
+      "dst_ip": "10.0.1.2",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 0.0028443336486816406,
+      "timestamp": "2026-03-04T02:11:43.197448"
+    },
+    {
+      "src": "h4",
+      "src_ip": "10.0.2.2",
+      "dst": "h2",
+      "dst_ip": "10.0.1.2",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 0.0026962757110595703,
+      "timestamp": "2026-03-04T02:11:43.197577"
+    },
+    {
+      "src": "h2",
+      "src_ip": "10.0.1.2",
+      "dst": "h1",
+      "dst_ip": "10.0.1.1",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 0.20802569389343262,
+      "timestamp": "2026-03-04T02:11:43.402052"
+    },
+    {
+      "src": "h1",
+      "src_ip": "10.0.1.1",
+      "dst": "h2",
+      "dst_ip": "10.0.1.2",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 0.20977115631103516,
+      "timestamp": "2026-03-04T02:11:43.403238"
+    },
+    {
+      "src": "h2",
+      "src_ip": "10.0.1.2",
+      "dst": "h3",
+      "dst_ip": "10.0.2.1",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 0.20931220054626465,
+      "timestamp": "2026-03-04T02:11:43.403631"
+    },
+    {
+      "src": "h1",
+      "src_ip": "10.0.1.1",
+      "dst": "h3",
+      "dst_ip": "10.0.2.1",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 0.21087074279785156,
+      "timestamp": "2026-03-04T02:11:43.404644"
+    },
+    {
+      "src": "h2",
+      "src_ip": "10.0.1.2",
+      "dst": "h4",
+      "dst_ip": "10.0.2.2",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 0.2103738784790039,
+      "timestamp": "2026-03-04T02:11:43.404775"
+    },
+    {
+      "src": "h4",
+      "src_ip": "10.0.2.2",
+      "dst": "h3",
+      "dst_ip": "10.0.2.1",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 0.21096587181091309,
+      "timestamp": "2026-03-04T02:11:43.405933"
+    },
+    {
+      "src": "h1",
+      "src_ip": "10.0.1.1",
+      "dst": "h4",
+      "dst_ip": "10.0.2.2",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 0.21212124824523926,
+      "timestamp": "2026-03-04T02:11:43.406008"
+    },
+    {
+      "src": "h3",
+      "src_ip": "10.0.2.1",
+      "dst": "h4",
+      "dst_ip": "10.0.2.2",
+      "protocol": "tcp",
+      "duration": 5,
+      "flow_completion_time": 11.108089447021484,
+      "timestamp": "2026-03-04T02:11:54.302864",
+      "bytes_sent": 524288,
+      "bps_sent": 838780.780313558,
+      "bytes_received": 262144,
+      "bps_received": 403779.50269600033
+    }
+  ],
+  "monitoring": {
+    "total_samples": 23,
+    "duration": 22.759567,
+    "link_utilization": {},
+    "packet_drops": {},
+    "flow_counts": {}
+  }
+}

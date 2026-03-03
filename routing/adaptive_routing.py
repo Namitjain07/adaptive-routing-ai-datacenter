@@ -6,8 +6,16 @@ Flowlet-based and congestion-aware routing for AI data center fabrics.
 
 import time
 import threading
+import logging
 from collections import defaultdict, deque
 import random
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.logger import get_logger
+
+logger = get_logger('adaptive_routing')
 
 
 class FlowletRouter:
@@ -28,6 +36,7 @@ class FlowletRouter:
         self.flowlet_table = {}  # (src, dst, flow_id) -> (last_time, path_id)
         self.path_loads = defaultdict(lambda: 0)  # path_id -> current load estimate
         self.lock = threading.Lock()
+        logger.debug(f"FlowletRouter initialized with timeout={flowlet_timeout}s")
         
     def get_flowlet_path(self, flow_key, available_paths, current_time):
         """
@@ -48,6 +57,7 @@ class FlowletRouter:
                 # If within flowlet timeout, use same path
                 if current_time - last_time < self.flowlet_timeout:
                     self.flowlet_table[flow_key] = (current_time, last_path)
+                    logger.debug(f"Reusing path {last_path} for flowlet {flow_key}")
                     return last_path
             
             # New flowlet - select least loaded path
@@ -55,6 +65,7 @@ class FlowletRouter:
                               key=lambda p: self.path_loads.get(p, 0))
             
             self.flowlet_table[flow_key] = (current_time, selected_path)
+            logger.debug(f"New flowlet {flow_key} assigned to path {selected_path}")
             return selected_path
     
     def update_path_load(self, path_id, load_delta):
@@ -83,6 +94,8 @@ class CongestionAwareRouter:
         self.path_congestion = defaultdict(lambda: 0.0)
         self.monitoring = False
         self.monitor_thread = None
+        logger.debug(f"CongestionAwareRouter initialized with probe_interval={probe_interval}s, "
+                    f"threshold={congestion_threshold}")
         
     def start_monitoring(self, net):
         """Start background monitoring of network statistics"""
@@ -91,12 +104,14 @@ class CongestionAwareRouter:
         self.monitor_thread = threading.Thread(target=self._monitor_loop)
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
+        logger.info("Congestion monitoring started")
         
     def stop_monitoring(self):
         """Stop background monitoring"""
         self.monitoring = False
         if self.monitor_thread:
             self.monitor_thread.join()
+        logger.info("Congestion monitoring stopped")
     
     def _monitor_loop(self):
         """Background loop to collect link statistics"""
@@ -173,6 +188,7 @@ class CongestionAwareRouter:
         
         # Select path with lowest congestion
         best_path = min(path_scores.keys(), key=lambda p: path_scores[p])
+        logger.debug(f"Selected path {best_path} with congestion score {path_scores[best_path]:.3f}")
         return best_path
 
 
@@ -196,17 +212,18 @@ class AdaptiveRoutingController:
             probe_interval=0.1,
             congestion_threshold=congestion_threshold
         )
+        logger.info(f"AdaptiveRoutingController initialized in {mode} mode")
         
     def start(self, net):
         """Start the adaptive routing controller"""
         if self.mode in ['congestion', 'hybrid']:
             self.congestion_router.start_monitoring(net)
-        print(f"*** Adaptive routing started (mode: {self.mode})")
+        logger.info(f"Adaptive routing started (mode: {self.mode})")
     
     def stop(self):
         """Stop the adaptive routing controller"""
         self.congestion_router.stop_monitoring()
-        print("*** Adaptive routing stopped")
+        logger.info("Adaptive routing stopped")
     
     def install_adaptive_rules(self, net, topology_info):
         """
@@ -215,7 +232,7 @@ class AdaptiveRoutingController:
         For adaptive routing, we use more dynamic flow rules that can be
         updated based on network conditions.
         """
-        print("*** Installing adaptive routing rules...")
+        logger.info("Installing adaptive routing rules...")
         
         num_spines = topology_info['num_spines']
         num_leaves = topology_info['num_leaves']
@@ -304,7 +321,7 @@ class AdaptiveRoutingController:
             # Default flow
             switch.cmd(f'ovs-ofctl add-flow {spine} "priority=0,actions=flood"')
         
-        print("*** Adaptive routing rules installed")
+        logger.info("Adaptive routing rules installed successfully")
 
 
 def setup_adaptive_routing(net, num_spines=4, num_leaves=4, hosts_per_leaf=4,
@@ -319,6 +336,9 @@ def setup_adaptive_routing(net, num_spines=4, num_leaves=4, hosts_per_leaf=4,
         hosts_per_leaf: Hosts per leaf switch
         mode: 'flowlet', 'congestion', or 'hybrid'
     """
+    logger.info(f"Setting up adaptive routing (mode={mode}, spines={num_spines}, "
+               f"leaves={num_leaves}, hosts/leaf={hosts_per_leaf})")
+    
     controller = AdaptiveRoutingController(mode=mode)
     
     topology_info = {
@@ -334,5 +354,7 @@ def setup_adaptive_routing(net, num_spines=4, num_leaves=4, hosts_per_leaf=4,
 
 
 if __name__ == '__main__':
-    print("Adaptive Routing Module")
-    print("Supports flowlet-based and congestion-aware routing")
+    from utils.logger import setup_logger
+    setup_logger('adaptive_routing', level=logging.INFO)
+    logger.info("Adaptive Routing Module")
+    logger.info("Supports flowlet-based and congestion-aware routing")

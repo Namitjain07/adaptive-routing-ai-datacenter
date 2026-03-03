@@ -11,6 +11,14 @@ from mininet.cli import CLI
 from mininet.log import setLogLevel, info
 from mininet.link import TCLink
 import argparse
+import logging
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.logger import get_logger
+
+logger = get_logger('topology')
 
 
 class LeafSpineTopo(Topo):
@@ -21,19 +29,27 @@ class LeafSpineTopo(Topo):
     - num_spines: Number of spine switches (default: 4)
     - num_leaves: Number of leaf switches (default: 4)
     - hosts_per_leaf: Number of hosts per leaf (default: 4)
-    - bw: Link bandwidth in Mbps (default: 1000)
+    - host_leaf_bw: Host-Leaf link bandwidth in Mbps (default: 20)
+    - leaf_spine_bw: Leaf-Spine link bandwidth in Mbps (default: 10)
     - delay: Link delay (default: '1ms')
+    - queue_size: Queue size in packets (default: 200)
     """
     
     def __init__(self, num_spines=4, num_leaves=4, hosts_per_leaf=4, 
-                 bw=1000, delay='1ms', **opts):
+                 host_leaf_bw=20, leaf_spine_bw=10, delay='1ms', queue_size=200, **opts):
         Topo.__init__(self, **opts)
         
         self.num_spines = num_spines
         self.num_leaves = num_leaves
         self.hosts_per_leaf = hosts_per_leaf
-        self.bw = bw
+        self.host_leaf_bw = host_leaf_bw
+        self.leaf_spine_bw = leaf_spine_bw
         self.delay = delay
+        self.queue_size = queue_size
+        
+        logger.info(f"Initializing Leaf-Spine topology: {num_spines} spines, {num_leaves} leaves, "
+                   f"{hosts_per_leaf} hosts/leaf, Host-Leaf: {host_leaf_bw} Mbps, "
+                   f"Leaf-Spine: {leaf_spine_bw} Mbps, Queue: {queue_size} packets")
         
         # Create spine switches
         spines = []
@@ -55,24 +71,31 @@ class LeafSpineTopo(Topo):
                 host = self.addHost(f'h{host_id}', 
                                    ip=f'10.0.{l+1}.{h+1}/24',
                                    mac=f'00:00:00:00:{l+1:02x}:{h+1:02x}')
-                self.addLink(host, leaf, bw=bw, delay=delay, max_queue_size=1000)
+                self.addLink(host, leaf, bw=host_leaf_bw, delay=delay, max_queue_size=queue_size)
                 info(f'*** Adding host: {host} -> {leaf}\n')
                 host_id += 1
             
             # Connect this leaf to all spines (full mesh)
             for spine in spines:
-                self.addLink(leaf, spine, bw=bw, delay=delay, max_queue_size=1000)
+                self.addLink(leaf, spine, bw=leaf_spine_bw, delay=delay, max_queue_size=queue_size)
                 info(f'*** Adding link: {leaf} <-> {spine}\n')
+        
+        logger.info(f"Topology created: {len(spines)} spines, {len(leaves)} leaves, "
+                   f"{host_id-1} total hosts")
 
 
 def create_network(num_spines=4, num_leaves=4, hosts_per_leaf=4):
     """Create and configure the Mininet network"""
     
+    logger.info(f"Creating Mininet network with Leaf-Spine topology")
+    
     topo = LeafSpineTopo(num_spines=num_spines, 
                         num_leaves=num_leaves, 
                         hosts_per_leaf=hosts_per_leaf,
-                        bw=10,  # 10 Mbps per link (lower bandwidth avoids HTB quantum warnings)
-                        delay='1ms')
+                        host_leaf_bw=20,  # Host-Leaf: 20 Mbps
+                        leaf_spine_bw=10,  # Leaf-Spine: 10 Mbps
+                        delay='1ms',
+                        queue_size=200)  # Queue: 200 packets
     
     net = Mininet(topo=topo,
                   switch=OVSKernelSwitch,
@@ -82,6 +105,7 @@ def create_network(num_spines=4, num_leaves=4, hosts_per_leaf=4):
                   autoStaticArp=True,
                   waitConnected=False)  # Disable waiting for controller
     
+    logger.info("Mininet network created successfully")
     return net
 
 
@@ -89,6 +113,7 @@ def run_topology(num_spines=4, num_leaves=4, hosts_per_leaf=4):
     """Run the leaf-spine topology"""
     
     setLogLevel('info')
+    logger.info('Starting Leaf-Spine Topology')
     
     info('*** Creating Leaf-Spine Topology\n')
     info(f'*** Spines: {num_spines}, Leaves: {num_leaves}, Hosts/Leaf: {hosts_per_leaf}\n')
@@ -106,6 +131,7 @@ def run_topology(num_spines=4, num_leaves=4, hosts_per_leaf=4):
     info('*** Running CLI\n')
     CLI(net)
     
+    logger.info('Stopping network')
     info('*** Stopping network\n')
     net.stop()
 
@@ -120,6 +146,9 @@ if __name__ == '__main__':
                        help='Number of hosts per leaf (default: 4)')
     
     args = parser.parse_args()
+    
+    from utils.logger import setup_logger
+    setup_logger('topology', level=logging.INFO)
     
     run_topology(num_spines=args.spines, 
                 num_leaves=args.leaves, 

@@ -8,9 +8,17 @@ import argparse
 import time
 import json
 import threading
+import logging
+import sys
+import os
 from datetime import datetime
 import random
 import subprocess
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.logger import get_logger
+
+logger = get_logger('traffic_generator')
 
 
 class AITrafficGenerator:
@@ -37,7 +45,7 @@ class AITrafficGenerator:
         
     def setup_iperf_servers(self, port=5001):
         """Start iperf3 servers on all hosts"""
-        print("*** Starting iperf3 servers on all hosts...")
+        logger.info("Starting iperf3 servers on all hosts...")
         
         for host in self.hosts:
             # Kill any existing iperf3 processes
@@ -47,14 +55,14 @@ class AITrafficGenerator:
             server_port = port
             host.cmd(f'iperf3 -s -p {server_port} -D > /dev/null 2>&1')
             self.servers[host.name] = server_port
-            print(f"  Server started on {host.name}:{server_port}")
+            logger.debug(f"Server started on {host.name}:{server_port}")
         
         # Wait for servers to start
         time.sleep(2)
     
     def cleanup_servers(self):
         """Stop all iperf3 servers"""
-        print("*** Stopping iperf3 servers...")
+        logger.info("Stopping iperf3 servers...")
         for host in self.hosts:
             host.cmd('pkill -9 iperf3')
     
@@ -70,8 +78,8 @@ class AITrafficGenerator:
             protocol: 'tcp' or 'udp'
             parallel: Number of parallel streams per flow
         """
-        print(f"\n*** Generating all-to-all traffic pattern")
-        print(f"    Duration: {duration}s, Bandwidth: {bandwidth}, Protocol: {protocol}")
+        logger.info(f"Generating all-to-all traffic pattern")
+        logger.info(f"Duration: {duration}s, Bandwidth: {bandwidth}, Protocol: {protocol}")
         
         self.setup_iperf_servers()
         
@@ -93,7 +101,7 @@ class AITrafficGenerator:
                 threads.append(thread)
         
         # Start all flows simultaneously (synchronized start)
-        print(f"*** Starting {len(threads)} flows simultaneously...")
+        logger.info(f"Starting {len(threads)} flows simultaneously...")
         start_time = time.time()
         
         for thread in threads:
@@ -106,7 +114,7 @@ class AITrafficGenerator:
         end_time = time.time()
         total_time = end_time - start_time
         
-        print(f"*** All flows completed in {total_time:.2f}s")
+        logger.info(f"All flows completed in {total_time:.2f}s")
         
         self.cleanup_servers()
         self.results = results
@@ -176,10 +184,10 @@ class AITrafficGenerator:
             
             results.append(flow_info)
             
-        except json.JSONDecodeError:
-            print(f"Warning: Failed to parse iperf3 output for {src_host.name} -> {dst_host.name}")
+        except json.JSONDecodeError as e:
+            logger.warning(f"Failed to parse iperf3 output for {src_host.name} -> {dst_host.name}: {e}")
         except Exception as e:
-            print(f"Error processing flow {src_host.name} -> {dst_host.name}: {e}")
+            logger.error(f"Error processing flow {src_host.name} -> {dst_host.name}: {e}")
     
     def generate_allreduce_pattern(self, duration=10, message_size='1M',
                                    num_iterations=10):
@@ -194,15 +202,15 @@ class AITrafficGenerator:
             message_size: Size of message per iteration
             num_iterations: Number of AllReduce iterations
         """
-        print(f"\n*** Simulating AllReduce pattern")
-        print(f"    Iterations: {num_iterations}, Message size: {message_size}")
+        logger.info(f"Simulating AllReduce pattern")
+        logger.info(f"Iterations: {num_iterations}, Message size: {message_size}")
         
         # Ring-AllReduce: each host sends to next in ring
         num_hosts = len(self.hosts)
         results = []
         
         for iteration in range(num_iterations):
-            print(f"  Iteration {iteration + 1}/{num_iterations}")
+            logger.debug(f"Iteration {iteration + 1}/{num_iterations}")
             
             # Scatter-Reduce phase
             for step in range(num_hosts - 1):
@@ -274,8 +282,8 @@ class AITrafficGenerator:
             idle_time: Idle time between bursts (seconds)
             bandwidth: Peak bandwidth during burst
         """
-        print(f"\n*** Generating bursty traffic pattern")
-        print(f"    Duration: {duration}s, Burst: {burst_size}, Idle: {idle_time}s")
+        logger.info(f"Generating bursty traffic pattern")
+        logger.info(f"Duration: {duration}s, Burst: {burst_size}, Idle: {idle_time}s")
         
         self.setup_iperf_servers()
         
@@ -331,14 +339,14 @@ class AITrafficGenerator:
                     'bps': result['end']['sum_received']['bits_per_second'],
                     'timestamp': datetime.now().isoformat()
                 })
-        except:
-            pass
+        except Exception as e:
+            logger.debug(f"Error parsing burst result: {e}")
     
     def save_results(self, filename):
         """Save traffic results to JSON file"""
         with open(filename, 'w') as f:
             json.dump(self.results, f, indent=2)
-        print(f"*** Results saved to {filename}")
+        logger.info(f"Results saved to {filename}")
 
 
 def run_traffic_test(net, traffic_type='all_to_all', duration=10):
@@ -374,7 +382,7 @@ def run_traffic_test(net, traffic_type='all_to_all', duration=10):
             idle_time=0.1
         )
     else:
-        print(f"Unknown traffic type: {traffic_type}")
+        logger.error(f"Unknown traffic type: {traffic_type}")
         return None
     
     return results
@@ -390,5 +398,7 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     
-    print("AI Traffic Generator")
-    print(f"Use with Mininet network for {args.type} traffic")
+    from utils.logger import setup_logger
+    setup_logger('traffic_generator', level=logging.INFO)
+    logger.info("AI Traffic Generator")
+    logger.info(f"Use with Mininet network for {args.type} traffic")
